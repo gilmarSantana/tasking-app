@@ -27,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Autenticação das credenciais recebidas com o banco de dados
     $pdo = pg_connector('tasking_app');
 
-    $search_credentials = "SELECT email, password, name, is_active FROM users WHERE email = :email;";
+    $search_credentials = "SELECT id, email, password, name, is_active FROM users WHERE email = :email;";
     $stmt_search_credentials = $pdo->prepare($search_credentials);
     $stmt_search_credentials->bindParam(':email', $sanitized_email);
     $stmt_search_credentials->execute();
@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     $db_email = $result_search_credentials['email'] ?? null;
     $db_password = $result_search_credentials['password'] ?? null;
-    $db_name = $result_search_credentials['name'] ?? null;
+    $db_name = $result_search_credentials['name'] ?? null;    
     $db_is_active = $result_search_credentials['is_active'] ?? null;
 
     // Verifica se o email existe no banco de dados
@@ -55,10 +55,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     session_start();
+    $db_user_id = $result_search_credentials['id'];
 
     $_SESSION['name'] = $db_name;
     $_SESSION['email'] = $db_email;
-
+    $_SESSION['user_id'] = $db_user_id;
+    
     header('Location: ../app/index.php');
     exit(200);
 }

@@ -1,0 +1,74 @@
+#main-separator-view {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    border: 1px solid silver;
+    border-radius: 10px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;    
+}
+
+/* ---------------------------------- */
+#div-form-add-task {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+#div-form-add-task h1 {
+    text-align: center;
+}
+
+#form-add-task {
+    border: 1px solid silver;
+    border-radius: 10px;
+    width: 70%;
+    padding: 20px;
+    
+}
+
+/* Todos os inputs tipo texto dentro desse form */
+#form-add-task input[type='text'] {
+    border: 1px solid silver;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+#form-add-task textarea {
+    border: 1px solid silver;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    margin-top: 10px;
+    margin-bottom: 20px;
+}
+
+#btn-save-task {
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    background-color: #6100e08a;
+    color: white;
+    cursor: pointer;
+}
+
+#btn-save-task:hover {
+        background-color: #9f56ff8a;
+}
+
+/* ---------------------------------- */
+
+#list-of-tasks {
+    background-color: green;
+    width: 100%;
+
+}
+
+#list-of-tasks h1 {
+    text-align: center;
+}
