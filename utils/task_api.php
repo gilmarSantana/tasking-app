@@ -23,7 +23,8 @@ function getAllTaksByUserId(int $user_id, string $order_by = 'date_created'): st
     try {
         $pdo = pg_connector();
 
-        $query = "SELECT * FROM tasks WHERE created_by = :user_id ORDER BY $order_by;";
+        $query = "SELECT * FROM tasks WHERE created_by = :user_id AND status in('done', 'pending') ORDER BY 
+            CASE WHEN status = 'pending' THEN 1 ELSE 2 end;";
         $stmt = $pdo->prepare($query);
         $stmt->bindParam(':user_id', $user_id);
         $stmt->execute();
@@ -33,14 +34,12 @@ function getAllTaksByUserId(int $user_id, string $order_by = 'date_created'): st
             'msg' => 'Tarefas carregas com sucesso',
             'tasks' => json_encode($result, JSON_UNESCAPED_UNICODE)
         ]);
-
     } catch (PDOException $e) {
         return json_encode([
             'response_type' => 'error',
             'msg' => htmlspecialchars($e->getMessage())
         ]);
     }
-
 }
 
 // Single responsability - Só cria a task no banco de dados
@@ -71,6 +70,75 @@ function createTask(int $user_id, string $title, string $description): string
 
 
 
+// Single responsability: Completar uma tarefa (Status: done)
+function completeTask(int $task_id, int $user_id)
+{
+    // Checar se tarefa pertence ao usuário logado
+    if (!check_task_owner($task_id, $user_id)) {
+        return json_encode([
+            'response_type' => 'error',
+            'msg' => 'Você não tem permissão para alterar esta tarefa'
+        ]);
+    }
+
+    try {
+        $pdo = pg_connector();
+
+        $query = "UPDATE tasks SET status = :status WHERE id = :task_id;";
+        $stmt = $pdo->prepare($query);
+        $stmt->bindValue(':status', 'done');
+        $stmt->bindParam(':task_id', $task_id);
+        $stmt->execute();
+
+        if (!$stmt->rowCount() > 0) {
+            return json_encode([
+                'response_type' => 'error',
+                'msg' => 'Erro ao atualizar status da tarefa',
+                'task_id' => $task_id
+            ]);
+        }
+
+        return json_encode([
+            'response_type' => 'success',
+            'msg' => 'Tarefa finalizada com sucesso',
+            'task_id' => $task_id
+        ]);
+    } catch (PDOException $e) {
+        return json_encode([
+            'response_type' => 'error',
+            'msg' => htmlspecialchars($e->getMessage())
+        ]);
+    }
+}
+
+
+// Single responsability: Checar se task id pertence a user_id
+function check_task_owner(int $task_id, int $user_id)
+{
+    $pdo = pg_connector();
+
+    try {
+        $query = "SELECT id, created_by FROM tasks WHERE id = :task_id";
+        $stmt = $pdo->prepare($query);
+        $stmt->bindParam(':task_id', $task_id);
+        $stmt->execute();
+
+        if ($stmt->rowCount() <= 0) {
+            return false;
+        }
+
+        $task = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($task['created_by'] !== $user_id) {
+            return false;
+        }
+
+        return true;
+    } catch (PDOException $e) {
+        throw new Exception("Error Processing Request:" . $e->getMessage(), 1);
+    }
+}
+
 
 
 
@@ -87,6 +155,11 @@ try {
             $title = $dados['title'];
             $description = $dados['description'];
             echo createTask($user_id, $title, $description);
+            break;
+
+        case 'completeTask':
+            $task_id = $dados['task_id'];
+            echo completeTask($task_id, $user_id);
             break;
         default:
 

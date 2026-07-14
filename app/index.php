@@ -52,7 +52,7 @@ include_once '../utils/pg_connector.php';
         </div>
     </main>
 
-    <script src="../js/index.js"></script>
+    <script src="../js/index.js" defer></script>
 </body>
 
 </html>
