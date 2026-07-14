@@ -64,11 +64,36 @@
 /* ---------------------------------- */
 
 #list-of-tasks {
-    background-color: green;
     width: 100%;
+    padding: 10px;
 
 }
 
+
 #list-of-tasks h1 {
     text-align: center;
+}
+
+.task-item {
+    background-color: bisque;
+    padding: 3px;
+    margin: 5px;
+    border: none;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+   align-items: center; 
+}
+
+.task-item p h2 {
+    padding: none;
+    margin: none;
+}
+
+.error-banner {
+    background-color: #e800008a;
+    color: rgb(90, 0, 0);
+    padding: 8px;
+    border: none;
+    border-radius: 5px;
 }

@@ -1,8 +1,11 @@
 document.addEventListener('DOMContentLoaded', function (e) {
+    // CARREGAR A LISTA DE TAREFAS DO USUÁRIO
+    refresh_tasks_list()
 
-    let form = document.getElementById('form-add-task');
 
-    form.addEventListener('submit', async function (e) {
+    // EVENTO: ENVIO DE FORMULÁRIO PARA CADASTRO DE TAREFA
+    let form_add_task = document.getElementById('form-add-task');
+    form_add_task.addEventListener('submit', async function (e) {
         e.preventDefault();
 
         let title = document.getElementById('title').value;
@@ -25,6 +28,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
         document.getElementById('form-add-task').reset();
         document.getElementById('title').focus();
     });
+
 });
 
 // Single responsability - Só faz post da tarefa para o backend salvar no banco de dados e retorna o resultado
@@ -88,4 +92,58 @@ function validate_task_title(title) {
         ok: true,
     }
 
+}
+
+// Single responability = Só busca as tarefas e retorna
+async function getAllTaksByUserId() {
+    const payload = { action: 'getAllTaksByUserId' }
+
+    const response = await fetch('../utils/task_api.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+    });
+
+    // Resposa da requisição
+    const data = await response.json();
+
+    if (data.response_type !== 'success') {
+        return { ok: false, msg: data.msg };
+    }
+
+    return { ok: true, msg: data.msg, tasks: data.tasks };
+}
+
+
+async function refresh_tasks_list() {
+    let data = await getAllTaksByUserId();
+
+    const div_list_of_tasks = document.getElementById('list-of-user-tasks');
+
+    if (data.ok) {
+        let user_tasks = JSON.parse(data.tasks);
+
+        let template = '';
+
+        user_tasks.forEach(task => {
+            template += `
+        <div class="task-item">
+            <h2>${task.title}</h2>
+            <p>${task.description}</p>
+        </div>`
+        });
+
+        div_list_of_tasks.innerHTML = template;
+        return;
+
+    } else {
+        div_list_of_tasks.innerHTML = `
+            <div class="error-banner">
+                ${data.msg}
+            </div>
+        `
+        return;
+    }
 }

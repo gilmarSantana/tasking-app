@@ -21,6 +21,7 @@ include_once '../utils/pg_connector.php';
         Olá, <?= $logged_name; ?>.
     </header>
     <main>
+        <button id="btn-test">Teste</button>
         <div id="main-separator-view">
             <div id="div-form-add-task">
                 <h1>Adicionar tarefa</h1>
@@ -43,6 +44,10 @@ include_once '../utils/pg_connector.php';
             </div>
             <div id="list-of-tasks">
                 <h1>Suas tarefas</h1>
+
+                <div id="list-of-user-tasks">
+                    
+                </div>
             </div>
         </div>
     </main>

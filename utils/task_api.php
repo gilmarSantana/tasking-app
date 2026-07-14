@@ -15,29 +15,37 @@ $user_id = $_SESSION['user_id'];
 
 include_once './pg_connector.php';
 
-function getAllTaksByUserId($user_id, $order_by = 'date_created')
-{
-    $response = [];
-
-    $pdo = pg_connector();
-
-    print_r($pdo);
-
-
-    return json_encode($response);
-}
-
-function createTask(int $user_id, string $title, string $description): string
+// Single responsability - Só pega todas as tarefas do usuário
+// Análise: Em todos os status?
+function getAllTaksByUserId(int $user_id, string $order_by = 'date_created'): string
 {
 
-    if (empty($title) || !$title) {
+    try {
+        $pdo = pg_connector();
+
+        $query = "SELECT * FROM tasks WHERE created_by = :user_id ORDER BY $order_by;";
+        $stmt = $pdo->prepare($query);
+        $stmt->bindParam(':user_id', $user_id);
+        $stmt->execute();
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return json_encode([
+            'response_type' => 'success',
+            'msg' => 'Tarefas carregas com sucesso',
+            'tasks' => json_encode($result, JSON_UNESCAPED_UNICODE)
+        ]);
+
+    } catch (PDOException $e) {
         return json_encode([
             'response_type' => 'error',
-            'msg' => 'O título da tarefa está vazio'
+            'msg' => htmlspecialchars($e->getMessage())
         ]);
     }
 
+}
 
+// Single responsability - Só cria a task no banco de dados
+function createTask(int $user_id, string $title, string $description): string
+{
     $pdo = pg_connector();
 
     try {
@@ -60,6 +68,8 @@ function createTask(int $user_id, string $title, string $description): string
         ]);
     }
 }
+
+
 
 
 
