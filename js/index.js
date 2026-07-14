@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
 async function addTask(title, description) {
 
     // Validar o título da tarefa
-    let valid_title = await validate_task_title(title);
+    let valid_title = validate_task_title(title);
 
     if (!valid_title.ok) {
         window.alert(valid_title.msg);

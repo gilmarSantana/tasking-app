@@ -17,7 +17,7 @@ include_once './pg_connector.php';
 
 // Single responsability - Só pega todas as tarefas do usuário
 // Análise: Em todos os status?
-function getAllTaksByUserId(int $user_id, string $order_by = 'date_created'): string
+function getAllTaksByUserId(int $user_id): string
 {
 
     try {
