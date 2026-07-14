@@ -112,6 +112,88 @@ function completeTask(int $task_id, int $user_id)
 }
 
 
+// Single responsability: Completar uma tarefa (Status: done)
+function archiveTask(int $task_id, int $user_id)
+{
+    // Checar se tarefa pertence ao usuário logado
+    if (!check_task_owner($task_id, $user_id)) {
+        return json_encode([
+            'response_type' => 'error',
+            'msg' => 'Você não tem permissão para alterar esta tarefa'
+        ]);
+    }
+
+    try {
+        $pdo = pg_connector();
+
+        $query = "UPDATE tasks SET status = :status WHERE id = :task_id;";
+        $stmt = $pdo->prepare($query);
+        $stmt->bindValue(':status', 'archived');
+        $stmt->bindParam(':task_id', $task_id);
+        $stmt->execute();
+
+        if (!$stmt->rowCount() > 0) {
+            return json_encode([
+                'response_type' => 'error',
+                'msg' => 'Erro ao atualizar status da tarefa',
+                'task_id' => $task_id
+            ]);
+        }
+
+        return json_encode([
+            'response_type' => 'success',
+            'msg' => 'Tarefa arquivada com sucesso',
+            'task_id' => $task_id
+        ]);
+    } catch (PDOException $e) {
+        return json_encode([
+            'response_type' => 'error',
+            'msg' => htmlspecialchars($e->getMessage())
+        ]);
+    }
+}
+
+// Single responsability: Completar uma tarefa (Status: done)
+function deleteTask(int $task_id, int $user_id)
+{
+    // Checar se tarefa pertence ao usuário logado
+    if (!check_task_owner($task_id, $user_id)) {
+        return json_encode([
+            'response_type' => 'error',
+            'msg' => 'Você não tem permissão para alterar esta tarefa'
+        ]);
+    }
+
+    try {
+        $pdo = pg_connector();
+
+        $query = "DELETE FROM tasks WHERE id = :task_id;";
+        $stmt = $pdo->prepare($query);
+        $stmt->bindParam(':task_id', $task_id);
+        $stmt->execute();
+
+        if (!$stmt->rowCount() > 0) {
+            return json_encode([
+                'response_type' => 'error',
+                'msg' => 'Erro ao excluir a tarefa',
+                'task_id' => $task_id
+            ]);
+        }
+
+        return json_encode([
+            'response_type' => 'success',
+            'msg' => 'Tarefa excluida com sucesso',
+            'task_id' => $task_id
+        ]);
+    } catch (PDOException $e) {
+        return json_encode([
+            'response_type' => 'error',
+            'msg' => htmlspecialchars($e->getMessage())
+        ]);
+    }
+}
+
+
 // Single responsability: Checar se task id pertence a user_id
 function check_task_owner(int $task_id, int $user_id)
 {
@@ -160,6 +242,16 @@ try {
         case 'completeTask':
             $task_id = $dados['task_id'];
             echo completeTask($task_id, $user_id);
+            break;
+
+        case 'archiveTask':
+            $task_id = $dados['task_id'];
+            echo archiveTask($task_id, $user_id);
+            break;
+
+        case 'deleteTask':
+            $task_id = $dados['task_id'];
+            echo deleteTask($task_id, $user_id);
             break;
         default:
 

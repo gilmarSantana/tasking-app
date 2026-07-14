@@ -50,10 +50,17 @@ document.addEventListener('DOMContentLoaded', function (e) {
 
         // EVENTO: DELETAR UMA TAREFA
         if (e.target.classList.contains('btn-delete-task')) {
-            let btn_complete_task = e.target;
-            let task_id = btn_complete_task.dataset['task_id'];
+            let btn_archive_task = e.target;
+            let task_id = btn_archive_task.dataset['task_id'];
 
-            alert('Deletar:' + task_id)
+            btn_archive_task.innerText = 'Excluindo...';
+            let result = await deleteTask(task_id);
+
+            if (result.ok) {
+                refresh_tasks_list();
+            } else {
+                console.error(result.msg);
+            }
         }
 
         // EVENTO: ARQUIVAR UMA TAREFA
@@ -62,7 +69,13 @@ document.addEventListener('DOMContentLoaded', function (e) {
             let task_id = btn_archive_task.dataset['task_id'];
 
             btn_archive_task.innerText = 'Arquivando...';
-            let result = await btn_archive_task(task_id);
+            let result = await archiveTask(task_id);
+
+            if (result.ok) {
+                refresh_tasks_list();
+            } else {
+                console.error(result.msg);
+            }
         }
     });
 
@@ -159,7 +172,7 @@ async function completeTask(task_id) {
 
     try {
         // Envia requisição POST para completar a tarefa
-        const payload = { task_id, action: 'completeTask' }
+        const payload = { task_id, action: 'completeTask' };
 
         await new Promise(resolve => setTimeout(resolve, 1500));
 
@@ -173,7 +186,7 @@ async function completeTask(task_id) {
 
         const data = await response.json();
 
-        return { ok: true, msg: data.msg, task_id: data.task_id }
+        return { ok: true, msg: data.msg, task_id: data.task_id };
 
     } catch (error) {
         console.error(error);
@@ -184,7 +197,54 @@ async function completeTask(task_id) {
 
 // Single responsability - Só envia requisição POST para arquivar a tarefa
 async function archiveTask(task_id) {
+    try {
+        // Envia requisição POST para arquivar a tarefa
+        const payload = { task_id, action: 'archiveTask' };
 
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
+        const response = await fetch('../utils/task_api.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+
+        return { ok: true, msg: data.msg, task_id: data.task_id };
+
+    } catch (error) {
+        console.error(error)
+        return { ok: false, msg: 'Erro de conexão com o servidor' }
+    }
+}
+
+// Single responsability - Só envia requisição POST para arquivar a tarefa
+async function deleteTask(task_id) {
+    try {
+        // Envia requisição DELETE para excluir a tarefa
+        const payload = { task_id, action: 'deleteTask' };
+
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
+        const response = await fetch('../utils/task_api.php', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+
+        return { ok: true, msg: data.msg, task_id: data.task_id };
+
+    } catch (error) {
+        console.error(error)
+        return { ok: false, msg: 'Erro de conexão com o servidor' }
+    }
 }
 
 
